@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<GridPane fx:controller="com.inspiracode.nowgroup.scspro.xl.controller.ImportController" 
+    xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
+<padding><Insets top="25" right="25" bottom="10" left="25"/></padding>
+	<Text text="Importar Orden de Compra" 
+        GridPane.columnIndex="0" GridPane.rowIndex="0"
+        GridPane.columnSpan="3"/>
+ 
+    <Label text="Orden de Compra:"
+        GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+ 
+    <TextField fx:id="poField" 
+        GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+     
+     <Button text="Explorar ..."   
+     	GridPane.columnIndex="2" GridPane.rowIndex="1"  
+        onAction="#handleExplorePO"/>
+ 
+    <Label text="Base de Datos:"
+        GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+ 
+    <TextField fx:id="dbField" 
+        GridPane.columnIndex="1" GridPane.rowIndex="2"/>
+        
+    <Button text="Explorar ..."   
+     	GridPane.columnIndex="2" GridPane.rowIndex="2"  
+        onAction="#handleExploreDB"/>
+     <Label text="" fx:id="messageLabel" 
+        GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="3"/>
+</GridPane>
