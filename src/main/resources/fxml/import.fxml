@@ -1,37 +1,85 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.lang.*?>
 <?import java.net.*?>
+<?import java.util.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.effect.*?>
 <?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.paint.*?>
+<?import javafx.scene.web.*?>
 
-<GridPane fx:controller="com.inspiracode.nowgroup.scspro.xl.controller.ImportController" 
-    xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
-<padding><Insets top="25" right="25" bottom="10" left="25"/></padding>
-	<Text text="Importar Orden de Compra" 
-        GridPane.columnIndex="0" GridPane.rowIndex="0"
-        GridPane.columnSpan="3"/>
- 
-    <Label text="Orden de Compra:"
-        GridPane.columnIndex="0" GridPane.rowIndex="1"/>
- 
-    <TextField fx:id="poField" 
-        GridPane.columnIndex="1" GridPane.rowIndex="1"/>
-     
-     <Button text="Explorar ..."   
-     	GridPane.columnIndex="2" GridPane.rowIndex="1"  
-        onAction="#handleExplorePO"/>
- 
-    <Label text="Base de Datos:"
-        GridPane.columnIndex="0" GridPane.rowIndex="2"/>
- 
-    <TextField fx:id="dbField" 
-        GridPane.columnIndex="1" GridPane.rowIndex="2"/>
-        
-    <Button text="Explorar ..."   
-     	GridPane.columnIndex="2" GridPane.rowIndex="2"  
-        onAction="#handleExploreDB"/>
-     <Label text="" fx:id="messageLabel" 
-        GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="3"/>
-</GridPane>
+<AnchorPane id="AnchorPane" blendMode="SRC_OVER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="564.0" prefWidth="730.0" xmlns:fx="http://javafx.com/fxml/1" xmlns="http://javafx.com/javafx/2.2" fx:controller="com.inspiracode.nowgroup.scspro.xl.controller.ImportController">
+  <children>
+    <SplitPane dividerPositions="0.4288256227758007" focusTraversable="true" minHeight="-Infinity" minWidth="-Infinity" orientation="VERTICAL" prefHeight="-1.0" prefWidth="-1.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <items>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+          <children>
+            <VBox prefHeight="200.0" prefWidth="100.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+              <children>
+                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                  <children>
+                    <Label text="Archivo de Excel:">
+                      <HBox.margin>
+                        <Insets left="15.0" fx:id="x1" />
+                      </HBox.margin>
+                    </Label>
+                    <TextField id="txtExcelFile" fx:id="poField" editable="false" prefWidth="-1.0" HBox.hgrow="ALWAYS">
+                      <effect>
+                        <DropShadow />
+                      </effect>
+                      <HBox.margin>
+                        <Insets left="15.0" right="15.0" fx:id="x2" />
+                      </HBox.margin>
+                    </TextField>
+                    <Button mnemonicParsing="false" onAction="#handleExplorePO" text="Explorar ..." textAlignment="CENTER" textOverrun="ELLIPSIS" HBox.hgrow="ALWAYS">
+                      <HBox.margin>
+                        <Insets right="15.0" fx:id="x3" />
+                      </HBox.margin>
+                    </Button>
+                  </children>
+                </HBox>
+                <HBox alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                  <children>
+                    <Label text="Archivo Base de Datos:" HBox.hgrow="ALWAYS" HBox.margin="$x1" />
+                    <TextField id="txtExcelFile" fx:id="dbField" editable="false" prefWidth="-1.0" HBox.hgrow="ALWAYS" HBox.margin="$x2">
+                      <effect>
+                        <DropShadow />
+                      </effect>
+                    </TextField>
+                    <Button mnemonicParsing="false" onAction="#handleExploreDB" text="Explorar ..." textAlignment="CENTER" textOverrun="ELLIPSIS" HBox.hgrow="ALWAYS" HBox.margin="$x3" />
+                  </children>
+                </HBox>
+                <VBox prefHeight="200.0" prefWidth="100.0">
+                  <children>
+                    <HBox id="cmdTransfer" alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                      <children>
+                        <ProgressBar fx:id="progress" prefWidth="320.0" progress="0.0" visible="false" HBox.hgrow="ALWAYS" />
+                        <Button fx:id="cmdTransfer" disable="true" mnemonicParsing="false" text="Transferir" HBox.hgrow="ALWAYS">
+                          <HBox.margin>
+                            <Insets left="20.0" />
+                          </HBox.margin>
+                        </Button>
+                      </children>
+                    </HBox>
+                    <AnchorPane prefHeight="200.0" prefWidth="200.0" VBox.vgrow="NEVER">
+                      <children>
+                        <Label id="lblResult" fx:id="messageLabel" alignment="TOP_LEFT" contentDisplay="LEFT" layoutY="52.0" prefWidth="-1.0" text="" textAlignment="CENTER" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" />
+                      </children>
+                    </AnchorPane>
+                  </children>
+                </VBox>
+              </children>
+            </VBox>
+          </children>
+        </AnchorPane>
+        <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+          <children>
+            <WebView fx:id="logView" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="15.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0" />
+          </children>
+        </AnchorPane>
+      </items>
+    </SplitPane>
+  </children>
+</AnchorPane>

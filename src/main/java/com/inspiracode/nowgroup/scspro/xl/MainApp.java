@@ -5,8 +5,11 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.inspiracode.nowgroup.scspro.xl.controller.ImportController;
 
 public class MainApp extends Application {
 
@@ -24,9 +27,11 @@ public class MainApp extends Application {
         log.debug("Loading FXML for main view from: {}", fxmlFile);
         FXMLLoader loader = new FXMLLoader();
         Parent rootNode = (Parent) loader.load(getClass().getResourceAsStream(fxmlFile));
+        ImportController controller = loader.getController();
+        controller.setStage(stage);
 
         log.debug("Showing JFX scene");
-        Scene scene = new Scene(rootNode, 400, 200);
+        Scene scene = new Scene(rootNode, 600, 800);
         scene.getStylesheets().add("/styles/styles.css");
 
         stage.setTitle("Importar ordenes de compra");
