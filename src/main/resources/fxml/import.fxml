@@ -56,7 +56,7 @@
                     <HBox id="cmdTransfer" alignment="CENTER" prefHeight="100.0" prefWidth="200.0" VBox.vgrow="NEVER">
                       <children>
                         <ProgressBar fx:id="progress" prefWidth="320.0" progress="0.0" visible="false" HBox.hgrow="ALWAYS" />
-                        <Button fx:id="cmdTransfer" disable="true" mnemonicParsing="false" text="Transferir" HBox.hgrow="ALWAYS">
+                        <Button fx:id="cmdTransfer" disable="true" mnemonicParsing="false" onAction="#handleTransfer" text="Transferir" HBox.hgrow="ALWAYS">
                           <HBox.margin>
                             <Insets left="20.0" />
                           </HBox.margin>

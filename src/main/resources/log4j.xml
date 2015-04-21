@@ -13,7 +13,6 @@
     <logger name="com.inspiracode.nowgroup.scspro.xl">
         <level value="DEBUG"/>
     </logger>
-
     <root>
         <priority value ="WARN" />
         <appender-ref ref="console" />

@@ -31,7 +31,7 @@ public class MainApp extends Application {
         controller.setStage(stage);
 
         log.debug("Showing JFX scene");
-        Scene scene = new Scene(rootNode, 600, 800);
+        Scene scene = new Scene(rootNode, 700, 800);
         scene.getStylesheets().add("/styles/styles.css");
 
         stage.setTitle("Importar ordenes de compra");

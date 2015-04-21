@@ -57,7 +57,7 @@ public class ExcelFile {
     private static final Logger log = LoggerFactory.getLogger(ExcelFile.class);
 
     private static final int HEADING_ROW = 0;
-    private static final int HEADING_COUNT = 45;
+    private static final int HEADING_COUNT = 43;
     private File file;
     private List<PurchaseOrder> pos;
 
@@ -137,7 +137,7 @@ public class ExcelFile {
 
 			errDescription = "La columna [" + nombreHoja + "]!" + columnName + " tiene el título [" + current + "], " + " se esperaba: ["
 				+ expected + "]";
-			log.debug(errDescription);
+			log.info(errDescription);
 			result.add(new LogMessage("Validación de encabezados", errDescription));
 		    } else {
 			log.debug("columna [" + expected + "] validada");
@@ -145,7 +145,7 @@ public class ExcelFile {
 		}
 	    } else {
 		errDescription = "Imposible abrir configuración de campos de excel (column_names.properties)";
-		log.debug(errDescription);
+		log.info(errDescription);
 		result.add(new LogMessage("Validación de encabezados", errDescription));
 	    }
 	} catch (Exception e) {
@@ -266,39 +266,42 @@ public class ExcelFile {
 	po.setPaymentCondition(row.getCell(15).getStringCellValue());
 	po.setSource(row.getCell(16).getStringCellValue());
 	po.setOcType(row.getCell(17).getStringCellValue());
+	
+	po.setMaterialType(row.getCell(18).getStringCellValue());
+	po.setMaterialClass(row.getCell(19).getStringCellValue());
 
-	if (!"".equals(getCellAsString(row.getCell(20))))
-	    po.setCustomsId(Integer.parseInt(getCellAsString(row.getCell(20))));
-
-	po.setTrafficType(row.getCell(21).getStringCellValue());
-	po.setTransportClass(row.getCell(22).getStringCellValue());
-	po.setTransportMode(row.getCell(24).getStringCellValue());
-	po.setPackageQty((int) Math.ceil(row.getCell(25).getNumericCellValue()));
-	po.setPackageType(getCellAsString(row.getCell(26)));
+	po.setTrafficType(row.getCell(20).getStringCellValue());
+	
+	Company freightForwarder = new Company();
+	freightForwarder.setCompanyName(getCellAsString(row.getCell(21)));
+	
+	po.setTransportMode(row.getCell(22).getStringCellValue());
+	po.setPackageQty((int) Math.ceil(row.getCell(23).getNumericCellValue()));
+	po.setPackageType(getCellAsString(row.getCell(24)));
 
 	PurchaseOrderItem item = new PurchaseOrderItem();
 	item.setSeqItem((int) Math.ceil(row.getCell(0).getNumericCellValue()));
 	item.setMaterialType(row.getCell(18).getStringCellValue());
 	item.setMaterialClass(row.getCell(19).getStringCellValue());
 
-	item.setStorage1(getCellAsString(row.getCell(27)));
-	item.setStorage2(getCellAsString(row.getCell(28)));
-	item.setItemNumber(getCellAsString(row.getCell(29)));
-	item.setPartNumber1(getCellAsString(row.getCell(30)));
-	item.setPartNumber2(getCellAsString(row.getCell(31)));
-	item.setSpanishDescription(row.getCell(32).getStringCellValue());
-	item.setEnglishDescription(row.getCell(33).getStringCellValue());
-	item.setMeasureUnit(getCellAsString(row.getCell(34)));
-	item.setOrderQuantity(row.getCell(35).getNumericCellValue());
-	item.setPendingQuantity(row.getCell(36).getNumericCellValue());
-	item.setUnitCost(row.getCell(37).getNumericCellValue());
-	item.setAmount(row.getCell(38).getNumericCellValue());
-	item.setWeightPounds(row.getCell(39).getNumericCellValue());
-	item.setMark(getCellAsString(row.getCell(40)));
-	item.setModel(getCellAsString(row.getCell(41)));
-	item.setSerie(getCellAsString(row.getCell(42)));
-	item.setLot(getCellAsString(row.getCell(43)));
-	item.setObservations(getCellAsString(row.getCell(44)));
+	item.setStorage1(getCellAsString(row.getCell(25)));
+	item.setStorage2(getCellAsString(row.getCell(26)));
+	item.setItemNumber(getCellAsString(row.getCell(27)));
+	item.setPartNumber1(getCellAsString(row.getCell(28)));
+	item.setPartNumber2(getCellAsString(row.getCell(29)));
+	item.setSpanishDescription(row.getCell(30).getStringCellValue());
+	item.setEnglishDescription(row.getCell(31).getStringCellValue());
+	item.setMeasureUnit(getCellAsString(row.getCell(32)));
+	item.setOrderQuantity(row.getCell(33).getNumericCellValue());
+	item.setPendingQuantity(row.getCell(34).getNumericCellValue());
+	item.setUnitCost(row.getCell(35).getNumericCellValue());
+	item.setAmount(row.getCell(36).getNumericCellValue());
+	item.setWeightPounds(row.getCell(37).getNumericCellValue());
+	item.setMark(getCellAsString(row.getCell(38)));
+	item.setModel(getCellAsString(row.getCell(39)));
+	item.setSerie(getCellAsString(row.getCell(40)));
+	item.setLot(getCellAsString(row.getCell(41)));
+	item.setObservations(getCellAsString(row.getCell(42)));
 
 	po.setItems(new ArrayList<PurchaseOrderItem>());
 	po.getItems().add(item);

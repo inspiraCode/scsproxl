@@ -51,9 +51,9 @@ public class PurchaseOrder {
     private String source;
     private String ocType;
     
-    private int customsId;
+    private int customsId; // not in access table
     private String trafficType;
-    private String transportClass;
+    private String transportClass; // not in access table.
     private String transportMode;
     private int packageQty;
     private String packageType;
@@ -64,6 +64,10 @@ public class PurchaseOrder {
     private Company purchaser;
     private Company seller;
     private Company sender;
+    private Company freightForwarder;
+    
+    private String materialType;
+    private String materialClass;
 
     /**
      * @return the poNumber
@@ -498,5 +502,47 @@ public class PurchaseOrder {
 	    return false;
 
 	return true;
+    }
+
+    /**
+     * @return the freightForwarder
+     */
+    public Company getFreightForwarder() {
+	return freightForwarder;
+    }
+
+    /**
+     * @param freightForwarder the freightForwarder to set
+     */
+    public void setFreightForwarder(Company freightForwarder) {
+	this.freightForwarder = freightForwarder;
+    }
+
+    /**
+     * @return the materialType
+     */
+    public String getMaterialType() {
+	return materialType;
+    }
+
+    /**
+     * @param materialType the materialType to set
+     */
+    public void setMaterialType(String materialType) {
+	this.materialType = materialType;
+    }
+
+    /**
+     * @return the materialClass
+     */
+    public String getMaterialClass() {
+	return materialClass;
+    }
+
+    /**
+     * @param materialClass the materialClass to set
+     */
+    public void setMaterialClass(String materialClass) {
+	this.materialClass = materialClass;
     }
 }

@@ -15,6 +15,7 @@ import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.inspiracode.nowgroup.scspro.xl.destination.AccessDb;
 import com.inspiracode.nowgroup.scspro.xl.domain.LogMessage;
 import com.inspiracode.nowgroup.scspro.xl.source.ExcelFile;
 
@@ -33,18 +34,19 @@ public class ImportController {
     private ProgressBar progress;
     @FXML
     private Button cmdTransfer;
-    
 
     private String logHeader = "<html><head><style>.bad{color:red;} .good{color:green;}</style></head><body>";
     private String logFooter = "</body></html>";
-    private String logContent;
+    private String logContent = "";
+    private int validatedFiles = 0;
     private Stage myStage;
     private ExcelFile excel;
+    private AccessDb access;
 
     public void handleExplorePO() {
-	log.debug("Setting purchase order file chooser");
+	log.info("Setting purchase order file chooser");
 	FileChooser fileChooser = new FileChooser();
-	fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+	fileChooser.setInitialDirectory(new File(System.getProperty("user.home") + "/documents"));
 	fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Excel", "*.xls;*.xlsx;*.xlsm"),
 		new FileChooser.ExtensionFilter("CSV", "*.csv"));
 	fileChooser.setTitle("Orden de Compra");
@@ -52,15 +54,14 @@ public class ImportController {
 	poField.setText(file.getName());
 
 	excel = new ExcelFile(file);
-	log.debug(file.getAbsolutePath());
+	log.info(file.getAbsolutePath());
 	messageLabel.setText("Validando Encabezados");
 	List<LogMessage> validationErrors = excel.validateFieldNames();
 	progress.setVisible(true);
 	progress.setProgress(0.2);
 
-	logContent = "";
 	if (validationErrors.isEmpty()) {
-	    logContent = "<b class='good'>Validaci&oacute;n de encabezados</b> La validación de encabezados sucedi&oacute; exitosamente.<br/>";
+	    logContent = "<b class='good'>Validaci&oacute;n de encabezados</b> La validación de encabezados sucedi&oacute; exitosamente.<br/>" + logContent;
 	    progress.setProgress(0.5);
 	    logView.getEngine().loadContent(logHeader + logContent + logFooter);
 	} else {
@@ -73,14 +74,15 @@ public class ImportController {
 	    }
 	    return;
 	}
-	
+
 	messageLabel.setText("Validando Ordenes de Compra");
 	validationErrors.addAll(excel.readPurchaseOrders());
 	progress.setVisible(true);
 	progress.setProgress(0.7);
-	
+
 	if (validationErrors.isEmpty()) {
-	    logContent = "<b class='good'>Validaci&oacute;n de &oacute;rdenes de compra</b> La validación de &oacute;rdenes de compra sucedi&oacute; exitosamente.<br/>" + logContent;
+	    logContent = "<b class='good'>Validaci&oacute;n de &oacute;rdenes de compra</b> La validación de &oacute;rdenes de compra sucedi&oacute; exitosamente.<br/>"
+		    + logContent;
 	    progress.setProgress(1);
 	    logView.getEngine().loadContent(logHeader + logContent + logFooter);
 	} else {
@@ -93,15 +95,59 @@ public class ImportController {
 	    }
 	    return;
 	}
-	
+
 	progress.setProgress(1);
 	progress.setVisible(false);
-	//cmdTransfer.setDisable(false);
+
+	validatedFiles++;
+	if (validatedFiles >= 2) {
+	    cmdTransfer.setDisable(false);
+	    validatedFiles = 0;
+	}
 
     }
 
     public void handleExploreDB() {
-	messageLabel.setText("Explore for DB");
+	// Conectar la BD
+	log.info("Setting database  file chooser");
+	FileChooser fileChooser = new FileChooser();
+	fileChooser.setInitialDirectory(new File(System.getProperty("user.home")));
+	fileChooser.getExtensionFilters().addAll(new FileChooser.ExtensionFilter("Access", "*.mdb;*.accdb"));
+	fileChooser.setTitle("Base de datos");
+	File file = fileChooser.showOpenDialog(myStage);
+	dbField.setText(file.getName());
+
+	access = new AccessDb(file);
+	List<LogMessage> validationErrors = access.validateDataBase();
+
+	// Validar tablas a utilizar
+	progress.setVisible(true);
+	progress.setProgress(0.2);
+
+	if (validationErrors.isEmpty()) {
+	    logContent = "<b class='good'>Validaci&oacute;n de base de datos</b> La validación de base de datos sucedi&oacute; exitosamente.<br/>" + logContent;
+	    progress.setProgress(0.5);
+	    logView.getEngine().loadContent(logHeader + logContent + logFooter);
+	} else {
+	    messageLabel.setText("La validación de base de datos ha fallado.");
+	    for (LogMessage message : validationErrors) {
+		logContent = "<b class='bad'>" + message.getSource() + "</b> " + message.getMessage() + "<br/>" + logContent;
+		logView.getEngine().loadContent(logHeader + logContent + logFooter);
+	    }
+	}
+
+	progress.setProgress(1);
+	progress.setVisible(false);
+	
+	validatedFiles++;
+	if (validatedFiles >= 2) {
+	    cmdTransfer.setDisable(false);
+	    validatedFiles = 0;
+	}
+    }
+    
+    public void handleTransfer() {
+	messageLabel.setText("Transfer data.");
     }
 
     public void setStage(Stage stage) {
