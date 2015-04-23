@@ -45,18 +45,15 @@ public class PurchaseOrder {
     private Date acceptanceDate;
     
     private String soNumber;
-    private String incoterm;
-    private String currency;
-    private String paymentCondition;
+    private Incoterms incoterm;
+    private Currency currency;
     private String source;
-    private String ocType;
+    private PurchaseOrderType ocType;
     
-    private int customsId; // not in access table
-    private String trafficType;
-    private String transportClass; // not in access table.
-    private String transportMode;
+    private TrafficType trafficType;
+    private TransportMode transportMode;
     private int packageQty;
-    private String packageType;
+    private PackageType packageType;
     private String storage1;
     private String storage2;
     
@@ -66,8 +63,8 @@ public class PurchaseOrder {
     private Company sender;
     private Company freightForwarder;
     
-    private String materialType;
-    private String materialClass;
+    private MaterialType materialType;
+    private MaterialClass materialClass;
 
     /**
      * @return the poNumber
@@ -132,7 +129,7 @@ public class PurchaseOrder {
     /**
      * @return the incoterm
      */
-    public String getIncoterm() {
+    public Incoterms getIncoterm() {
 	return incoterm;
     }
 
@@ -140,14 +137,14 @@ public class PurchaseOrder {
      * @param incoterm
      *            the incoterm to set
      */
-    public void setIncoterm(String incoterm) {
+    public void setIncoterm(Incoterms incoterm) {
 	this.incoterm = incoterm;
     }
 
     /**
      * @return the currency
      */
-    public String getCurrency() {
+    public Currency getCurrency() {
 	return currency;
     }
 
@@ -155,23 +152,8 @@ public class PurchaseOrder {
      * @param currency
      *            the currency to set
      */
-    public void setCurrency(String currency) {
+    public void setCurrency(Currency currency) {
 	this.currency = currency;
-    }
-
-    /**
-     * @return the paymentCondition
-     */
-    public String getPaymentCondition() {
-	return paymentCondition;
-    }
-
-    /**
-     * @param paymentCondition
-     *            the paymentCondition to set
-     */
-    public void setPaymentCondition(String paymentCondition) {
-	this.paymentCondition = paymentCondition;
     }
 
     /**
@@ -192,7 +174,7 @@ public class PurchaseOrder {
     /**
      * @return the ocType
      */
-    public String getOcType() {
+    public PurchaseOrderType getOcType() {
 	return ocType;
     }
 
@@ -200,29 +182,15 @@ public class PurchaseOrder {
      * @param ocType
      *            the ocType to set
      */
-    public void setOcType(String ocType) {
+    public void setOcType(PurchaseOrderType ocType) {
 	this.ocType = ocType;
     }
 
-    /**
-     * @return the customsId
-     */
-    public int getCustomsId() {
-	return customsId;
-    }
-
-    /**
-     * @param customsId
-     *            the customsId to set
-     */
-    public void setCustomsId(int customsId) {
-	this.customsId = customsId;
-    }
 
     /**
      * @return the trafficType
      */
-    public String getTrafficType() {
+    public TrafficType getTrafficType() {
 	return trafficType;
     }
 
@@ -230,29 +198,15 @@ public class PurchaseOrder {
      * @param trafficType
      *            the trafficType to set
      */
-    public void setTrafficType(String trafficType) {
+    public void setTrafficType(TrafficType trafficType) {
 	this.trafficType = trafficType;
     }
 
-    /**
-     * @return the transportClass
-     */
-    public String getTransportClass() {
-	return transportClass;
-    }
-
-    /**
-     * @param transportClass
-     *            the transportClass to set
-     */
-    public void setTransportClass(String transportClass) {
-	this.transportClass = transportClass;
-    }
 
     /**
      * @return the transportMode
      */
-    public String getTransportMode() {
+    public TransportMode getTransportMode() {
 	return transportMode;
     }
 
@@ -260,7 +214,7 @@ public class PurchaseOrder {
      * @param transportMode
      *            the transportMode to set
      */
-    public void setTransportMode(String transportMode) {
+    public void setTransportMode(TransportMode transportMode) {
 	this.transportMode = transportMode;
     }
 
@@ -282,7 +236,7 @@ public class PurchaseOrder {
     /**
      * @return the packageType
      */
-    public String getPackageType() {
+    public PackageType getPackageType() {
 	return packageType;
     }
 
@@ -290,7 +244,7 @@ public class PurchaseOrder {
      * @param packageType
      *            the packageType to set
      */
-    public void setPackageType(String packageType) {
+    public void setPackageType(PackageType packageType) {
 	this.packageType = packageType;
     }
 
@@ -434,74 +388,20 @@ public class PurchaseOrder {
 	return true;
     }
     
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "{poNumber=" + poNumber + ", poDate=" + poDate + ", etd=" + etd + ", eta=" + eta + ", acceptanceDate=" + acceptanceDate + ", " +
+	 "soNumber=" + soNumber + ", incoterm=" + incoterm + ", currency=" + currency + ", source=" + source + ", " +
+	 "ocType=" + ocType + ",  trafficType=" + trafficType + ", transportMode=" + transportMode + ", " + 
+	 "packageQty=" + packageQty + ", packageType=" + packageType + ", storage1=" + storage1 + ", storage2=" + storage2 + ", " +
+	 "purchaser=" + purchaser + ", seller=" + seller + ", sender=" + sender + ", freightForwarder=" + freightForwarder + ", materialType=" + materialType + ", materialClass=" + materialClass + "}";
+    }
+    
     public boolean matchComplete(PurchaseOrder other) {
-	if(!this.acceptanceDate.equals(other.acceptanceDate))
-	    return false;
-	
-	if(!this.currency.equals(other.currency))
-	    return false;
-	
-	if(this.customsId != other.customsId)
-	    return false;
-	
-	if(!this.eta.equals(other.eta))
-	    return false;
-	
-	if(!this.etd.equals(other.etd))
-	    return false;
-	
-	if(!this.incoterm.equals(other.incoterm))
-	    return false;
-	
-	if(!this.ocType.equals(other.ocType))
-	    return false;
-	
-	if(this.packageQty!=other.packageQty)
-	    return false;
-	
-	if(!this.packageType.equals(other.packageType))
-	    return false;
-	
-	if(!this.paymentCondition.equals(other.paymentCondition))
-	    return false;
-	
-	if(!this.poDate.equals(other.poDate))
-	    return false;
-	
-	if(!this.poNumber.equals(other.poNumber))
-	    return false;
-	
-	if(!this.purchaser.matchComplete(other.purchaser))
-	    return false;
-	
-	if(!this.seller.matchComplete(other.seller))
-	    return false;
-	
-	if(!this.sender.matchComplete(other.sender))
-	    return false;
-	
-	if(!this.soNumber.equals(other.soNumber))
-	    return false;
-	
-	if(!this.source.equals(other.source))
-	    return false;
-	
-	if(!this.storage1.equals(other.storage1))
-	    return false;
-	
-	if(!this.storage2.equals(other.storage2))
-	    return false;
-	
-	if(!this.trafficType.equals(other.trafficType))
-	    return false;
-	
-	if(!this.transportClass.equals(other.transportClass))
-	    return false;
-	
-	if(!this.transportMode.equals(other.transportMode))
-	    return false;
-
-	return true;
+	return this.toString().equals(other.toString());
     }
 
     /**
@@ -521,28 +421,28 @@ public class PurchaseOrder {
     /**
      * @return the materialType
      */
-    public String getMaterialType() {
+    public MaterialType getMaterialType() {
 	return materialType;
     }
 
     /**
      * @param materialType the materialType to set
      */
-    public void setMaterialType(String materialType) {
+    public void setMaterialType(MaterialType materialType) {
 	this.materialType = materialType;
     }
 
     /**
      * @return the materialClass
      */
-    public String getMaterialClass() {
+    public MaterialClass getMaterialClass() {
 	return materialClass;
     }
 
     /**
      * @param materialClass the materialClass to set
      */
-    public void setMaterialClass(String materialClass) {
+    public void setMaterialClass(MaterialClass materialClass) {
 	this.materialClass = materialClass;
     }
 }

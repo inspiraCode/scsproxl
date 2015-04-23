@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -32,9 +33,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.inspiracode.nowgroup.scspro.xl.domain.Company;
+import com.inspiracode.nowgroup.scspro.xl.domain.Currency;
+import com.inspiracode.nowgroup.scspro.xl.domain.Incoterms;
 import com.inspiracode.nowgroup.scspro.xl.domain.LogMessage;
+import com.inspiracode.nowgroup.scspro.xl.domain.MaterialClass;
+import com.inspiracode.nowgroup.scspro.xl.domain.MaterialType;
+import com.inspiracode.nowgroup.scspro.xl.domain.PackageType;
 import com.inspiracode.nowgroup.scspro.xl.domain.PurchaseOrder;
 import com.inspiracode.nowgroup.scspro.xl.domain.PurchaseOrderItem;
+import com.inspiracode.nowgroup.scspro.xl.domain.PurchaseOrderType;
+import com.inspiracode.nowgroup.scspro.xl.domain.TrafficType;
+import com.inspiracode.nowgroup.scspro.xl.domain.TransportMode;
 
 /**
  * USAGE HERE
@@ -223,7 +232,10 @@ public class ExcelFile {
 			    "La partida %d no coincide con la primer partida encontrada %d, se suponen ambas elementos de la misma orden de compra %s", po
 				    .getItems().get(0).getSeqItem(), existent.getItems().get(0).getSeqItem(), existent.getPoNumber());
 		    result.add(new LogMessage("Validación de Ordenes de Compra", msg));
+		    log.debug(po.toString() + "*====*" + existent.toString());
 		}
+	    } else {
+		pos.add(po);
 	    }
 	    rowIndex++;
 	    currentRow = sheet.getRow(rowIndex);
@@ -236,21 +248,19 @@ public class ExcelFile {
 	PurchaseOrder po = new PurchaseOrder();
 
 	Company purchaser = new Company();
-	purchaser.setCompanyId(getCellAsString(row.getCell(1)));
+	purchaser.setCompanyCode(getCellAsString(row.getCell(1)));
 	purchaser.setCompanyName(row.getCell(2).getStringCellValue());
 	po.setPurchaser(purchaser);
 
 	Company seller = new Company();
-	seller.setCompanyId(getCellAsString(row.getCell(3)));
+	seller.setCompanyCode(getCellAsString(row.getCell(3)));
 	seller.setCompanyName(row.getCell(4).getStringCellValue());
 	po.setSeller(seller);
 
 	Company sender = new Company();
-	sender.setCompanyId(row.getCell(5).getStringCellValue());
+	sender.setCompanyCode(row.getCell(5).getStringCellValue());
 	sender.setCompanyName(row.getCell(6).getStringCellValue());
 	po.setSender(sender);
-
-	// row.getCell(8).getCellType()
 
 	po.setPoNumber(getCellAsString(row.getCell(7)));
 	log.debug("PO Number: " + po.getPoNumber());
@@ -261,47 +271,90 @@ public class ExcelFile {
 	po.setSoNumber(row.getCell(11).getStringCellValue());
 	po.setAcceptanceDate(row.getCell(12).getDateCellValue());
 
-	po.setIncoterm(row.getCell(13).getStringCellValue());
-	po.setCurrency(row.getCell(14).getStringCellValue());
-	po.setPaymentCondition(row.getCell(15).getStringCellValue());
-	po.setSource(row.getCell(16).getStringCellValue());
-	po.setOcType(row.getCell(17).getStringCellValue());
+	Incoterms incoterm = new Incoterms();
+	String incotermContent = getCellAsString(row.getCell(13));
+	if(incotermContent.length()==3)
+	    incoterm.setIncotermsCode(incotermContent);
+	else
+	    incoterm.setIncotermsName(incotermContent);
 	
-	po.setMaterialType(row.getCell(18).getStringCellValue());
-	po.setMaterialClass(row.getCell(19).getStringCellValue());
+	po.setIncoterm(incoterm);
+	
+	Currency currency = new Currency();
+	String currencyContent = getCellAsString(row.getCell(14)).trim();
+	if( currencyContent.length() == 3 )
+	    currency.setCurrencyCode(currencyContent);
+	else
+	    currency.setCurrencyName(currencyContent);
+	
+	po.setCurrency(currency);
+	po.setSource(row.getCell(15).getStringCellValue());
+	
+	PurchaseOrderType poType = new PurchaseOrderType();
+	poType.setPoTypeName(getCellAsString(row.getCell(16)));
+	po.setOcType(poType);
+	
+	MaterialType materialType = new MaterialType();
+	materialType.setMaterialTypeName(getCellAsString(row.getCell(17)));
+	po.setMaterialType(materialType);
+	
+	
+	MaterialClass materialClass = new MaterialClass();
+	materialClass.setMaterialClassName(getCellAsString(row.getCell(18)));
+	po.setMaterialClass(materialClass);
 
-	po.setTrafficType(row.getCell(20).getStringCellValue());
+	TrafficType tt = new TrafficType();
+	String trafficTypeContent = getCellAsString(row.getCell(19));
+	
+	if(trafficTypeContent.length()<=2 && StringUtils.isNumeric(trafficTypeContent))
+	    tt.setTrafficTypeCode(Integer.parseInt(trafficTypeContent));
+	else
+	    tt.setTrafficTypeName(trafficTypeContent);
+	
+	po.setTrafficType(tt);
 	
 	Company freightForwarder = new Company();
-	freightForwarder.setCompanyName(getCellAsString(row.getCell(21)));
+	freightForwarder.setCompanyName(getCellAsString(row.getCell(20)));
 	
-	po.setTransportMode(row.getCell(22).getStringCellValue());
-	po.setPackageQty((int) Math.ceil(row.getCell(23).getNumericCellValue()));
-	po.setPackageType(getCellAsString(row.getCell(24)));
+	TransportMode poTm = new TransportMode();
+	poTm.setTransportModeName(getCellAsString(row.getCell(21)));
+	po.setTransportMode(poTm);
+	
+	po.setPackageQty((int) Math.ceil(row.getCell(22).getNumericCellValue()));
+	
+	PackageType packageType = new PackageType();
+	String packageTypeContent = getCellAsString(row.getCell(23));
+	if( packageTypeContent.length() <= 4 && !packageTypeContent.equalsIgnoreCase("DRUM"))
+	    packageType.setPackageTypeCode(packageTypeContent);
+	else
+	    packageType.setPackageTypeName(packageTypeContent);
+	
+	po.setPackageType( packageType );
 
 	PurchaseOrderItem item = new PurchaseOrderItem();
 	item.setSeqItem((int) Math.ceil(row.getCell(0).getNumericCellValue()));
-	item.setMaterialType(row.getCell(18).getStringCellValue());
-	item.setMaterialClass(row.getCell(19).getStringCellValue());
+	
+	item.setMaterialType(materialType);
+	item.setMaterialClass(materialClass);
 
-	item.setStorage1(getCellAsString(row.getCell(25)));
-	item.setStorage2(getCellAsString(row.getCell(26)));
-	item.setItemNumber(getCellAsString(row.getCell(27)));
-	item.setPartNumber1(getCellAsString(row.getCell(28)));
-	item.setPartNumber2(getCellAsString(row.getCell(29)));
-	item.setSpanishDescription(row.getCell(30).getStringCellValue());
-	item.setEnglishDescription(row.getCell(31).getStringCellValue());
-	item.setMeasureUnit(getCellAsString(row.getCell(32)));
-	item.setOrderQuantity(row.getCell(33).getNumericCellValue());
-	item.setPendingQuantity(row.getCell(34).getNumericCellValue());
-	item.setUnitCost(row.getCell(35).getNumericCellValue());
-	item.setAmount(row.getCell(36).getNumericCellValue());
-	item.setWeightPounds(row.getCell(37).getNumericCellValue());
-	item.setMark(getCellAsString(row.getCell(38)));
-	item.setModel(getCellAsString(row.getCell(39)));
-	item.setSerie(getCellAsString(row.getCell(40)));
-	item.setLot(getCellAsString(row.getCell(41)));
-	item.setObservations(getCellAsString(row.getCell(42)));
+	item.setStorage1(getCellAsString(row.getCell(24)));
+	item.setStorage2(getCellAsString(row.getCell(25)));
+	item.setItemNumber(getCellAsString(row.getCell(26)));
+	item.setPartNumber1(getCellAsString(row.getCell(27)));
+	item.setPartNumber2(getCellAsString(row.getCell(28)));
+	item.setSpanishDescription(row.getCell(29).getStringCellValue());
+	item.setEnglishDescription(row.getCell(30).getStringCellValue());
+	item.setMeasureUnit(getCellAsString(row.getCell(31)));
+	item.setOrderQuantity(row.getCell(32).getNumericCellValue());
+	item.setPendingQuantity(row.getCell(33).getNumericCellValue());
+	item.setUnitCost(row.getCell(34).getNumericCellValue());
+	item.setAmount(row.getCell(35).getNumericCellValue());
+	item.setWeightPounds(row.getCell(36).getNumericCellValue());
+	item.setMark(getCellAsString(row.getCell(37)));
+	item.setModel(getCellAsString(row.getCell(38)));
+	item.setSerie(getCellAsString(row.getCell(39)));
+	item.setLot(getCellAsString(row.getCell(40)));
+	item.setObservations(getCellAsString(row.getCell(41)));
 
 	po.setItems(new ArrayList<PurchaseOrderItem>());
 	po.getItems().add(item);

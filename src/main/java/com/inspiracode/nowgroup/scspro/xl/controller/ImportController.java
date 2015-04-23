@@ -1,6 +1,7 @@
 package com.inspiracode.nowgroup.scspro.xl.controller;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import javafx.fxml.FXML;
@@ -17,6 +18,7 @@ import org.slf4j.LoggerFactory;
 
 import com.inspiracode.nowgroup.scspro.xl.destination.AccessDb;
 import com.inspiracode.nowgroup.scspro.xl.domain.LogMessage;
+import com.inspiracode.nowgroup.scspro.xl.domain.PurchaseOrder;
 import com.inspiracode.nowgroup.scspro.xl.source.ExcelFile;
 
 public class ImportController {
@@ -88,7 +90,7 @@ public class ImportController {
 	} else {
 	    progress.setProgress(1);
 	    progress.setVisible(false);
-	    messageLabel.setText("La validación de &oacute;rdenes de compra ha fallado.");
+	    messageLabel.setText("La validación de órdenes de compra ha fallado.");
 	    for (LogMessage message : validationErrors) {
 		logContent = "<b class='bad'>" + message.getSource() + "</b> " + message.getMessage() + "<br/>" + logContent;
 		logView.getEngine().loadContent(logHeader + logContent + logFooter);
@@ -138,16 +140,49 @@ public class ImportController {
 
 	progress.setProgress(1);
 	progress.setVisible(false);
-	
+
 	validatedFiles++;
 	if (validatedFiles >= 2) {
 	    cmdTransfer.setDisable(false);
 	    validatedFiles = 0;
 	}
     }
-    
+
     public void handleTransfer() {
-	messageLabel.setText("Transfer data.");
+	log.info("Transfering data from excel to access");
+	messageLabel.setText("Transfiriendo datos...");
+	progress.setVisible(true);
+	progress.setProgress(0.0d);
+
+	List<LogMessage> validationErrors = new ArrayList<LogMessage>();
+
+	int poCount = excel.getPos().size();
+	log.debug("Trasfer " + poCount + " Purchase Orders.");
+	int poIndex = 0;
+	for (PurchaseOrder po : excel.getPos()) {
+	    validationErrors.addAll(access.uploadPO(po));
+
+	    if (!validationErrors.isEmpty()) {
+		for (LogMessage message : validationErrors) {
+		    logContent = "<b class='bad'>" + message.getSource() + "</b> " + message.getMessage() + "<br/>" + logContent;
+		    logView.getEngine().loadContent(logHeader + logContent + logFooter);
+		}
+	    }
+
+	    progress.setProgress(poIndex / poCount);
+	    poIndex++;
+	}
+	messageLabel.setText("Datos Transferidos");
+	logContent = "<H1>DATOS TRANSFERIDOS</H1><br/><hr/>" + logContent;
+	    logView.getEngine().loadContent(logHeader + logContent + logFooter);
+	excel = null;
+	access = null;
+	cmdTransfer.setDisable(true);
+	progress.setVisible(false);
+	
+	logContent = "";
+	poField.setText("");
+	dbField.setText("");
     }
 
     public void setStage(Stage stage) {

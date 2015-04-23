@@ -40,8 +40,8 @@ public class PurchaseOrderItem {
     private String itemNumber;
     private String partNumber1;
     private String partNumber2;
-    private String materialType;
-    private String materialClass;
+    private MaterialType materialType;
+    private MaterialClass materialClass;
     private String spanishDescription;
     private String englishDescription;
     private String measureUnit;
@@ -344,28 +344,28 @@ public class PurchaseOrderItem {
     /**
      * @return the materialType
      */
-    public String getMaterialType() {
+    public MaterialType getMaterialType() {
 	return materialType;
     }
 
     /**
      * @param materialType the materialType to set
      */
-    public void setMaterialType(String materialType) {
+    public void setMaterialType(MaterialType materialType) {
 	this.materialType = materialType;
     }
 
     /**
      * @return the materialClass
      */
-    public String getMaterialClass() {
+    public MaterialClass getMaterialClass() {
 	return materialClass;
     }
 
     /**
      * @param materialClass the materialClass to set
      */
-    public void setMaterialClass(String materialClass) {
+    public void setMaterialClass(MaterialClass materialClass) {
 	this.materialClass = materialClass;
     }
 

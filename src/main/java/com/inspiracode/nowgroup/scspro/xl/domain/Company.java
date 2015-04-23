@@ -33,13 +33,14 @@ package com.inspiracode.nowgroup.scspro.xl.domain;
  * 
  */
 public class Company {
-    private String companyId;
+    private Long companyId;
     private String companyName;
+    private String companyCode;
 
     /**
      * @return the companyId
      */
-    public String getCompanyId() {
+    public Long getCompanyId() {
 	return companyId;
     }
 
@@ -47,7 +48,7 @@ public class Company {
      * @param companyId
      *            the companyId to set
      */
-    public void setCompanyId(String companyId) {
+    public void setCompanyId(Long companyId) {
 	this.companyId = companyId;
     }
 
@@ -67,14 +68,15 @@ public class Company {
     }
     
     public boolean matchComplete(Company other) {
-	
-	if(!this.companyId.equals(other.companyId))
-	    return false;
-	
-	if(!this.companyName.equals(other.companyName))
-	    return false;
-	
-	return true;
+	return this.toString().equals(other.toString());
+    }
+    
+    /* (non-Javadoc)
+     * @see java.lang.Object#toString()
+     */
+    @Override
+    public String toString() {
+        return "{companyId=" + companyId + ", companyCode=" + companyCode + ", companyName=" + companyName + "}";
     }
     
     /* (non-Javadoc)
@@ -100,6 +102,20 @@ public class Company {
 	} else if (!companyId.equals(other.companyId))
 	    return false;
 	return true;
+    }
+
+    /**
+     * @return the companyCode
+     */
+    public String getCompanyCode() {
+	return companyCode;
+    }
+
+    /**
+     * @param companyCode the companyCode to set
+     */
+    public void setCompanyCode(String companyCode) {
+	this.companyCode = companyCode;
     }
 
 }

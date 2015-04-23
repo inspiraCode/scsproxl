@@ -29,7 +29,17 @@ import com.healthmarketscience.jackcess.Column;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Table;
+import com.inspiracode.nowgroup.scspro.xl.destination.dao.CompanyDao;
+import com.inspiracode.nowgroup.scspro.xl.destination.dao.CurrencyDao;
+import com.inspiracode.nowgroup.scspro.xl.destination.dao.IncotermDao;
+import com.inspiracode.nowgroup.scspro.xl.destination.dao.MaterialClassDao;
+import com.inspiracode.nowgroup.scspro.xl.destination.dao.MaterialTypeDao;
+import com.inspiracode.nowgroup.scspro.xl.destination.dao.POTypeDao;
+import com.inspiracode.nowgroup.scspro.xl.destination.dao.PackageTypeDao;
+import com.inspiracode.nowgroup.scspro.xl.destination.dao.TrafficTypeDao;
+import com.inspiracode.nowgroup.scspro.xl.destination.dao.TransportModeDao;
 import com.inspiracode.nowgroup.scspro.xl.domain.LogMessage;
+import com.inspiracode.nowgroup.scspro.xl.domain.PurchaseOrder;
 import com.inspiracode.nowgroup.scspro.xl.source.ExcelFile;
 
 /**
@@ -74,6 +84,8 @@ public class AccessDb {
 	    Database db = DatabaseBuilder.open(file);
 	    result.addAll(validateColumns(db, prop, "po.table.name", "po.table.columns"));
 	    result.addAll(validateColumns(db, prop, "po.items.table.name", "po.items.table.columns"));
+	    result.addAll(validateColumns(db, prop, "cat.company.table", "cat.company.columns"));
+	    result.addAll(validateColumns(db, prop, "cat.company.code.table", "cat.company.code.columns"));
 	    db.close();
 	} catch (Exception e) {
 	    log.error("Error al conectarse a la base de datos: " + e.getMessage(), e);
@@ -86,6 +98,90 @@ public class AccessDb {
 		    log.error("Error al desconectar la base de datos: " + e.getMessage(), e);
 		}
 
+	}
+	return result;
+    }
+
+    public List<LogMessage> uploadPO(PurchaseOrder PO) {
+	List<LogMessage> result = new ArrayList<LogMessage>();
+
+	try {
+	    Database db = DatabaseBuilder.open(file);
+	    
+	    // Currency
+	    CurrencyDao currencyDao = new CurrencyDao(db);
+	    Long currencyId = currencyDao.currencyId(PO.getCurrency());
+	    PO.getCurrency().setCurrencyId(currencyId);
+	    
+	    // Purchase Order Type
+	    POTypeDao poTypeDao = new POTypeDao(db);
+	    int poTypeId = poTypeDao.poTypeId(PO.getOcType());
+	    PO.getOcType().setPoTypeId(poTypeId);
+	    
+	    // Material
+	    MaterialTypeDao materialTypeDao = new MaterialTypeDao(db);
+	    int materialTypeId = materialTypeDao.materialTypeId(PO.getMaterialType());
+	    PO.getMaterialType().setMaterialTypeId(materialTypeId);
+	    
+	    
+	    MaterialClassDao materialClassDao = new MaterialClassDao(db);
+	    int materialClassId = materialClassDao.materialClassId(PO.getMaterialClass());
+	    PO.getMaterialClass().setMaterialClassId(materialClassId);
+	    
+	    // Incoterms
+	    IncotermDao iDao = new IncotermDao(db);
+	    int incotermId = iDao.incotermId(PO.getIncoterm());
+	    PO.getIncoterm().setIncotermsId(incotermId);
+	    
+	    // PackType
+	    PackageTypeDao ptDao = new PackageTypeDao(db);
+	    int packageTypeId = ptDao.packageTypeId(PO.getPackageType());
+	    PO.getPackageType().setPackageTypeId(packageTypeId);
+	    
+	    // Traffic type
+	    TrafficTypeDao ttDao = new TrafficTypeDao(db);
+	    int ttId = ttDao.trafficTypeId(PO.getTrafficType());
+	    PO.getPackageType().setPackageTypeId(ttId);
+	    
+	    // Transport mode
+	    TransportModeDao tmDao = new TransportModeDao(db);
+	    int tmId = tmDao.trafficModeId(PO.getTransportMode());
+	    PO.getTransportMode().setTransportModeId(tmId);
+	    
+	    // payment conditions
+	    
+	    // Companies
+	    CompanyDao cdao = new CompanyDao(db);
+	    if (PO.getPurchaser() != null && !cdao.companyExists(PO.getPurchaser())) {
+		LogMessage message = cdao.addCompany(PO.getPurchaser(), CompanyDao.TIPO_COMPRADOR);
+		if (message != null)
+		    result.add(message);
+	    }
+
+	    if (PO.getSeller() != null && !cdao.companyExists(PO.getSeller())) {
+		LogMessage message = cdao.addCompany(PO.getSeller(), CompanyDao.TIPO_VENDEDOR);
+		if (message != null)
+		    result.add(message);
+	    }
+
+	    if (PO.getSender() != null && !cdao.companyExists(PO.getSender())) {
+		LogMessage message = cdao.addCompany(PO.getSender(), CompanyDao.TIPO_REMITENTE);
+		if (message != null)
+		    result.add(message);
+	    }
+
+	    if (PO.getFreightForwarder() != null && !cdao.companyExists(PO.getFreightForwarder())) {
+		LogMessage message = cdao.addCompany(PO.getFreightForwarder(), CompanyDao.TIPO_TRANSPORTISTA);
+		if (message != null)
+		    result.add(message);
+	    }
+	    
+	    
+
+	    db.close();
+	} catch (Exception e) {
+	    log.error("Error al conectarse a la base de datos: " + e.getMessage(), e);
+	    result.add(new LogMessage("Validación de Base de Datos", "Error al validar la base de datos" + e.getMessage()));
 	}
 	return result;
     }
