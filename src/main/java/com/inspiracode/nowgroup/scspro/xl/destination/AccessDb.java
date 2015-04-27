@@ -26,13 +26,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.healthmarketscience.jackcess.Column;
+import com.healthmarketscience.jackcess.ColumnBuilder;
+import com.healthmarketscience.jackcess.DataType;
 import com.healthmarketscience.jackcess.Database;
 import com.healthmarketscience.jackcess.DatabaseBuilder;
 import com.healthmarketscience.jackcess.Table;
+import com.healthmarketscience.jackcess.TableBuilder;
 import com.inspiracode.nowgroup.scspro.xl.destination.dao.CompanyDao;
 import com.inspiracode.nowgroup.scspro.xl.destination.dao.CurrencyDao;
 import com.inspiracode.nowgroup.scspro.xl.destination.dao.IncotermDao;
 import com.inspiracode.nowgroup.scspro.xl.destination.dao.MaterialClassDao;
+import com.inspiracode.nowgroup.scspro.xl.destination.dao.MaterialDao;
 import com.inspiracode.nowgroup.scspro.xl.destination.dao.MaterialTypeDao;
 import com.inspiracode.nowgroup.scspro.xl.destination.dao.POTypeDao;
 import com.inspiracode.nowgroup.scspro.xl.destination.dao.PackageTypeDao;
@@ -40,7 +44,7 @@ import com.inspiracode.nowgroup.scspro.xl.destination.dao.TrafficTypeDao;
 import com.inspiracode.nowgroup.scspro.xl.destination.dao.TransportModeDao;
 import com.inspiracode.nowgroup.scspro.xl.domain.LogMessage;
 import com.inspiracode.nowgroup.scspro.xl.domain.PurchaseOrder;
-import com.inspiracode.nowgroup.scspro.xl.source.ExcelFile;
+import com.inspiracode.nowgroup.scspro.xl.domain.PurchaseOrderItem;
 
 /**
  * USAGE HERE
@@ -60,7 +64,7 @@ import com.inspiracode.nowgroup.scspro.xl.source.ExcelFile;
  * 
  */
 public class AccessDb {
-    private static final Logger log = LoggerFactory.getLogger(ExcelFile.class);
+    private static final Logger log = LoggerFactory.getLogger(AccessDb.class);
 
     private File file;
 
@@ -86,6 +90,13 @@ public class AccessDb {
 	    result.addAll(validateColumns(db, prop, "po.items.table.name", "po.items.table.columns"));
 	    result.addAll(validateColumns(db, prop, "cat.company.table", "cat.company.columns"));
 	    result.addAll(validateColumns(db, prop, "cat.company.code.table", "cat.company.code.columns"));
+
+	    if (db.getTable("CAT_COMPANIAS_EQUIV") != null)
+		result.addAll(validateColumns(db, prop, "cat.equivalent.client.table", "cat.equivalent.client.columns"));
+	    else
+		addEquivalenceTable(db);
+	    
+	    db.flush();
 	    db.close();
 	} catch (Exception e) {
 	    log.error("Error al conectarse a la base de datos: " + e.getMessage(), e);
@@ -102,82 +113,92 @@ public class AccessDb {
 	return result;
     }
 
-    public List<LogMessage> uploadPO(PurchaseOrder PO) {
+    private void addEquivalenceTable(Database db) throws IOException {
+	Table tblEquiv = new TableBuilder("CAT_COMPANIAS_EQUIV")
+		.addColumn(new ColumnBuilder("IDCompania", DataType.LONG))
+		.addColumn(new ColumnBuilder("nombre_scs", DataType.TEXT))
+		.addColumn(new ColumnBuilder("nombre_origen", DataType.TEXT)).toTable(db);
+	log.warn("Added table: " + tblEquiv.getName());
+    }
+
+    public List<LogMessage> validatePO(PurchaseOrder PO) {
 	List<LogMessage> result = new ArrayList<LogMessage>();
 
 	try {
 	    Database db = DatabaseBuilder.open(file);
-	    
+
 	    // Currency
 	    CurrencyDao currencyDao = new CurrencyDao(db);
 	    Long currencyId = currencyDao.currencyId(PO.getCurrency());
 	    PO.getCurrency().setCurrencyId(currencyId);
-	    
+
 	    // Purchase Order Type
 	    POTypeDao poTypeDao = new POTypeDao(db);
 	    int poTypeId = poTypeDao.poTypeId(PO.getOcType());
 	    PO.getOcType().setPoTypeId(poTypeId);
-	    
+
 	    // Material
 	    MaterialTypeDao materialTypeDao = new MaterialTypeDao(db);
 	    int materialTypeId = materialTypeDao.materialTypeId(PO.getMaterialType());
 	    PO.getMaterialType().setMaterialTypeId(materialTypeId);
-	    
-	    
+
 	    MaterialClassDao materialClassDao = new MaterialClassDao(db);
 	    int materialClassId = materialClassDao.materialClassId(PO.getMaterialClass());
 	    PO.getMaterialClass().setMaterialClassId(materialClassId);
-	    
+
 	    // Incoterms
 	    IncotermDao iDao = new IncotermDao(db);
 	    int incotermId = iDao.incotermId(PO.getIncoterm());
 	    PO.getIncoterm().setIncotermsId(incotermId);
-	    
+
 	    // PackType
 	    PackageTypeDao ptDao = new PackageTypeDao(db);
 	    int packageTypeId = ptDao.packageTypeId(PO.getPackageType());
 	    PO.getPackageType().setPackageTypeId(packageTypeId);
-	    
+
 	    // Traffic type
 	    TrafficTypeDao ttDao = new TrafficTypeDao(db);
 	    int ttId = ttDao.trafficTypeId(PO.getTrafficType());
 	    PO.getPackageType().setPackageTypeId(ttId);
-	    
+
 	    // Transport mode
 	    TransportModeDao tmDao = new TransportModeDao(db);
 	    int tmId = tmDao.trafficModeId(PO.getTransportMode());
 	    PO.getTransportMode().setTransportModeId(tmId);
-	    
+
 	    // payment conditions
-	    
+
 	    // Companies
 	    CompanyDao cdao = new CompanyDao(db);
-	    if (PO.getPurchaser() != null && !cdao.companyExists(PO.getPurchaser())) {
-		LogMessage message = cdao.addCompany(PO.getPurchaser(), CompanyDao.TIPO_COMPRADOR);
-		if (message != null)
-		    result.add(message);
-	    }
-
-	    if (PO.getSeller() != null && !cdao.companyExists(PO.getSeller())) {
-		LogMessage message = cdao.addCompany(PO.getSeller(), CompanyDao.TIPO_VENDEDOR);
-		if (message != null)
-		    result.add(message);
-	    }
-
-	    if (PO.getSender() != null && !cdao.companyExists(PO.getSender())) {
-		LogMessage message = cdao.addCompany(PO.getSender(), CompanyDao.TIPO_REMITENTE);
-		if (message != null)
-		    result.add(message);
-	    }
-
-	    if (PO.getFreightForwarder() != null && !cdao.companyExists(PO.getFreightForwarder())) {
-		LogMessage message = cdao.addCompany(PO.getFreightForwarder(), CompanyDao.TIPO_TRANSPORTISTA);
-		if (message != null)
-		    result.add(message);
+	    if(PO.getPurchaser()==null)
+		result.add(new LogMessage("Validación de Orden de Compra", "La orden de compra " + PO.getPoNumber() + " no tiene un comprador."));
+	    
+	    if (PO.getPurchaser() != null && !cdao.companyMatchesInternal(PO.getPurchaser())) {
+		result.add(new LogMessage("Validación de Orden de Compra", "La orden de compra " + PO.getPoNumber() + " no tiene un comprador válido en la base de datos."));
+		return result;
 	    }
 	    
+	    Integer purchaserId = PO.getPurchaser().getCompanyId();
 	    
+	    if (PO.getSeller() != null && !cdao.companyExists(PO.getSeller(), purchaserId)) {
+		result.add(new LogMessage("Validación de Orden de Compra", "Existen proveedores no registrados para el cliente: " + PO.getPurchaser().getCompanyName()));
+	    }
 
+	    if (PO.getSender() != null && !cdao.companyExists(PO.getSender(), purchaserId)) {
+		result.add(new LogMessage("Validación de Orden de Compra", "Existen proveedores no registrados para el cliente: " + PO.getPurchaser().getCompanyName()));
+	    }
+
+	    if (PO.getFreightForwarder() != null && !cdao.companyExists(PO.getFreightForwarder(), purchaserId)) {
+		result.add(new LogMessage("Validación de Orden de Compra", "Existen proveedores no registrados para el cliente: " + PO.getPurchaser().getCompanyName()));
+	    }
+	    
+	    for(PurchaseOrderItem poItem : PO.getItems()) {
+		poItem.getMaterial().setPurchaser(PO.getPurchaser());
+		poItem.getMaterial().setSeller(PO.getSeller());
+		result.addAll(validatePOItem(poItem, db));
+	    }
+	    
+	    db.flush();
 	    db.close();
 	} catch (Exception e) {
 	    log.error("Error al conectarse a la base de datos: " + e.getMessage(), e);
@@ -186,6 +207,26 @@ public class AccessDb {
 	return result;
     }
 
+    private List<LogMessage> validatePOItem(PurchaseOrderItem POItem, Database db){
+	List<LogMessage> result = new ArrayList<LogMessage>();
+	// Validate
+	MaterialDao mdao = new MaterialDao(db);
+	Integer matId;
+	try {
+	    matId = mdao.getIdMaterial(POItem.getMaterial());
+	    if(matId == 0) {
+		result.add(new LogMessage("Validación de Partida de Orden de Compra", "Número de parte no es válido en la partida: " + POItem.getSeqItem()));
+		return result;
+	    }
+	    
+	    POItem.getMaterial().setMaterialId(matId);
+	} catch (IOException e) {
+	    result.add(new LogMessage("Validación de Partida de Orden de Compra", "Error: " + e.getMessage()));
+	}
+	
+	return result;
+    }
+    
     @SuppressWarnings("unchecked")
     private List<LogMessage> validateColumns(Database db, Properties prop, String tablePropertyName, String columnsCollectionPropertyName) throws IOException {
 	List<LogMessage> result = new ArrayList<LogMessage>();

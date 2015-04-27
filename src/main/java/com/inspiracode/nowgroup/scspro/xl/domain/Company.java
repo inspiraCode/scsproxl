@@ -33,14 +33,14 @@ package com.inspiracode.nowgroup.scspro.xl.domain;
  * 
  */
 public class Company {
-    private Long companyId;
+    private Integer companyId;
     private String companyName;
     private String companyCode;
 
     /**
      * @return the companyId
      */
-    public Long getCompanyId() {
+    public Integer getCompanyId() {
 	return companyId;
     }
 
@@ -48,7 +48,7 @@ public class Company {
      * @param companyId
      *            the companyId to set
      */
-    public void setCompanyId(Long companyId) {
+    public void setCompanyId(Integer companyId) {
 	this.companyId = companyId;
     }
 

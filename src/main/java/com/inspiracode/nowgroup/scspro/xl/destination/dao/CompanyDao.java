@@ -16,16 +16,18 @@
 package com.inspiracode.nowgroup.scspro.xl.destination.dao;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.healthmarketscience.jackcess.Column;
+import com.healthmarketscience.jackcess.Cursor;
+import com.healthmarketscience.jackcess.CursorBuilder;
 import com.healthmarketscience.jackcess.Database;
-import com.healthmarketscience.jackcess.Row;
 import com.healthmarketscience.jackcess.Table;
 import com.inspiracode.nowgroup.scspro.xl.domain.Company;
-import com.inspiracode.nowgroup.scspro.xl.domain.LogMessage;
 
 /**
  * USAGE HERE
@@ -60,42 +62,66 @@ public class CompanyDao {
 	this.db = db;
     }
 
-    public boolean companyExists(Company company) throws IOException {
+    public boolean companyExists(Company company, Integer purchaserId) throws IOException {
 	if (company == null || company.getCompanyName() == null) {
 	    log.warn("EMTPY COMPANY!");
 	    return false;
 	}
 
 	log.debug("Locate " + company.getCompanyName());
-	Table table = db.getTable("Companias");
-	for (Row row : table) {
-	    String companyName = String.valueOf(row.get("Nombre"));
-	    if (company.getCompanyName().trim().equalsIgnoreCase(companyName.trim()))
-		return true;
+	Table table = db.getTable("CAT_COMPANIAS_EQUIV");
+	
+	Cursor cursor = CursorBuilder.createCursor(table);
+	Map<String, Object> filter = new HashMap<String, Object>();
+	filter.put("nombre_origen", company.getCompanyName().trim());
+	filter.put("IDCompania", purchaserId);
+	
+	boolean found = cursor.findFirstRow(filter);
+	if(!found) {
+	    found = companyMatchesInternal(company);
+	    if(found)
+		table.addRow(purchaserId, company.getCompanyName(), company.getCompanyName());
+	    else
+		table.addRow(purchaserId, "", company.getCompanyName());
+	} else {
+	    company.setCompanyName(cursor.getCurrentRowValue(table.getColumn("nombre_scs")).toString());
+	    company.setCompanyId(companyIdFromName(cursor.getCurrentRowValue(table.getColumn("nombre_scs")).toString()));
+	    found = company.getCompanyId()==null || company.getCompanyId()==0;
 	}
 
-	return false;
+	return found;
     }
-
-    public LogMessage addCompany(Company company, int tipoEmpresa) throws IOException {
-	if (company == null)
-	    return new LogMessage("Agregar Empresa", "Empresa vacía.");
-
-	try {
-	    Table table = db.getTable("Companias");
-	    Object[] addedRow = table.addRow(Column.AUTO_NUMBER, PAIS_INDETERMINADO, company.getCompanyCode(), company.getCompanyName());
-	    
-	    Integer id = (Integer) addedRow[0];
-	    log.info("New company added with ID[" + id + "]");
-	    company.setCompanyId(id.longValue());
-
-	    Table tTipoEmpresa = db.getTable("ENLACE-Companias y tipos");
-	    tTipoEmpresa.addRow(Column.AUTO_NUMBER, id, tipoEmpresa);
-	} catch (Exception e) {
-	    log.error(e.getMessage(), e);
-	    return new LogMessage("Agregar empresa", "Error: " + e.getMessage());
+    
+    public boolean companyMatchesInternal(Company company) throws IOException {
+	if(company == null) {
+	    log.warn("searching for empty company!");
+	    return false;
 	}
-
-	return null;
+	
+	Table table = db.getTable("Companias");
+	
+	log.debug("searching for company: " + company);
+	Cursor cursor = CursorBuilder.createCursor(table);
+	Map<String, Object> rowPattern = new HashMap<String, Object>();
+	rowPattern.put("Nombre", company.getCompanyName().trim());
+	boolean found = cursor.findFirstRow(rowPattern);
+	if(found) {
+	    company.setCompanyId((Integer) cursor.getCurrentRowValue(table.getColumn("IDCompania")));
+	} else {
+	    log.warn("No record found in table.");
+	}
+	
+	return found;
+    }
+    
+    private Integer companyIdFromName(String companyName) throws IOException{
+	Table table = db.getTable("Companias");
+	
+	Cursor cursor = CursorBuilder.createCursor(table);
+	boolean found = cursor.findFirstRow(Collections.singletonMap("nombre", companyName));
+	if(found)
+	    return (Integer) cursor.getCurrentRowValue(table.getColumn("IDCompania"));
+	else
+	    return 0;
     }
 }

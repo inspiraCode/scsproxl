@@ -67,9 +67,9 @@ public class CurrencyDao {
 	boolean found = false;
 
 	if (currency.getCurrencyCode() == null)
-	    cursor.findFirstRow(Collections.singletonMap("ClaveMoneda", currency.getCurrencyCode()));
+	    found = cursor.findFirstRow(Collections.singletonMap("ClaveMoneda", currency.getCurrencyCode()));
 	else
-	    cursor.findFirstRow(Collections.singletonMap("NombreMoneda", currency.getCurrencyName()));
+	    found = cursor.findFirstRow(Collections.singletonMap("NombreMoneda", currency.getCurrencyName()));
 
 	if (!found)
 	    return INDETERMINADO;

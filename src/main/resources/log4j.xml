@@ -9,9 +9,18 @@
             <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
         </layout>
     </appender>
+    
+    <appender name="file" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="File" value="/temp/scsproxl.log"/>
+        <param name="DatePattern" value="-yyyy-MM-dd"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%-5p %c{1} - %m%n"/>
+        </layout>
+    </appender>
 
     <logger name="com.inspiracode.nowgroup.scspro.xl">
         <level value="DEBUG"/>
+        <appender-ref ref="file" />
     </logger>
     <root>
         <priority value ="WARN" />

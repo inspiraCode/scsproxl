@@ -127,12 +127,14 @@ public class ImportController {
 	progress.setProgress(0.2);
 
 	if (validationErrors.isEmpty()) {
+	    log.info("Validación de base de datos exitosa.");
 	    logContent = "<b class='good'>Validaci&oacute;n de base de datos</b> La validación de base de datos sucedi&oacute; exitosamente.<br/>" + logContent;
 	    progress.setProgress(0.5);
 	    logView.getEngine().loadContent(logHeader + logContent + logFooter);
 	} else {
 	    messageLabel.setText("La validación de base de datos ha fallado.");
 	    for (LogMessage message : validationErrors) {
+		log.error(message.getSource() + ":" + message.getMessage());
 		logContent = "<b class='bad'>" + message.getSource() + "</b> " + message.getMessage() + "<br/>" + logContent;
 		logView.getEngine().loadContent(logHeader + logContent + logFooter);
 	    }
@@ -160,26 +162,35 @@ public class ImportController {
 	log.debug("Trasfer " + poCount + " Purchase Orders.");
 	int poIndex = 0;
 	for (PurchaseOrder po : excel.getPos()) {
-	    validationErrors.addAll(access.uploadPO(po));
+	    log.debug("Validating PO: " + po);
+	    validationErrors.addAll(access.validatePO(po));
 
 	    if (!validationErrors.isEmpty()) {
 		for (LogMessage message : validationErrors) {
+		    log.error(message.getSource() + ":" + message.getMessage());
 		    logContent = "<b class='bad'>" + message.getSource() + "</b> " + message.getMessage() + "<br/>" + logContent;
 		    logView.getEngine().loadContent(logHeader + logContent + logFooter);
 		}
+	    } else {
+		log.info("Validación de OC:" + po.getPoNumber() + " exitosa");
+		// TODO: Upload PO
 	    }
 
 	    progress.setProgress(poIndex / poCount);
 	    poIndex++;
 	}
-	messageLabel.setText("Datos Transferidos");
-	logContent = "<H1>DATOS TRANSFERIDOS</H1><br/><hr/>" + logContent;
+	if (validationErrors.isEmpty()) {
+	    log.info("Datos transferidos exitosamente.");
+	    messageLabel.setText("Datos Transferidos");
+	    logContent = "<H1>DATOS TRANSFERIDOS</H1><br/><hr/>" + logContent;
 	    logView.getEngine().loadContent(logHeader + logContent + logFooter);
+	}
+
 	excel = null;
 	access = null;
 	cmdTransfer.setDisable(true);
 	progress.setVisible(false);
-	
+
 	logContent = "";
 	poField.setText("");
 	dbField.setText("");

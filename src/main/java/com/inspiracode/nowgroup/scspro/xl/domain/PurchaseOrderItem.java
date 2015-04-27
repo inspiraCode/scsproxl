@@ -38,12 +38,12 @@ public class PurchaseOrderItem {
     private String storage1;
     private String storage2;
     private String itemNumber;
-    private String partNumber1;
-    private String partNumber2;
+    
     private MaterialType materialType;
     private MaterialClass materialClass;
-    private String spanishDescription;
-    private String englishDescription;
+    
+    private Material material;
+
     private String measureUnit;
     private double orderQuantity;
     private double pendingQuantity;
@@ -117,63 +117,17 @@ public class PurchaseOrderItem {
     }
 
     /**
-     * @return the partNumber1
+     * @return the material
      */
-    public String getPartNumber1() {
-	return partNumber1;
+    public Material getMaterial() {
+	return material;
     }
-
+    
     /**
-     * @param partNumber1
-     *            the partNumber1 to set
+     * @param material the material to set
      */
-    public void setPartNumber1(String partNumber1) {
-	this.partNumber1 = partNumber1;
-    }
-
-    /**
-     * @return the partNumber2
-     */
-    public String getPartNumber2() {
-	return partNumber2;
-    }
-
-    /**
-     * @param partNumber2
-     *            the partNumber2 to set
-     */
-    public void setPartNumber2(String partNumber2) {
-	this.partNumber2 = partNumber2;
-    }
-
-    /**
-     * @return the spanishDescription
-     */
-    public String getSpanishDescription() {
-	return spanishDescription;
-    }
-
-    /**
-     * @param spanishDescription
-     *            the spanishDescription to set
-     */
-    public void setSpanishDescription(String spanishDescription) {
-	this.spanishDescription = spanishDescription;
-    }
-
-    /**
-     * @return the englishDescription
-     */
-    public String getEnglishDescription() {
-	return englishDescription;
-    }
-
-    /**
-     * @param englishDescription
-     *            the englishDescription to set
-     */
-    public void setEnglishDescription(String englishDescription) {
-	this.englishDescription = englishDescription;
+    public void setMaterial(Material material) {
+	this.material = material;
     }
 
     /**

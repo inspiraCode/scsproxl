@@ -65,9 +65,9 @@ public class IncotermDao {
 	boolean found = false;
 
 	if (incoterm.getIncotermsCode() == null)
-	    cursor.findFirstRow(Collections.singletonMap("Clave", incoterm.getIncotermsCode()));
+	    found = cursor.findFirstRow(Collections.singletonMap("Clave", incoterm.getIncotermsCode()));
 	else
-	    cursor.findFirstRow(Collections.singletonMap("Incoterm", incoterm.getIncotermsName()));
+	    found = cursor.findFirstRow(Collections.singletonMap("Incoterm", incoterm.getIncotermsName()));
 
 	if (!found)
 	    return INDETERMINADO;

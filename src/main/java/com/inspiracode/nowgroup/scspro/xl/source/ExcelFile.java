@@ -36,6 +36,7 @@ import com.inspiracode.nowgroup.scspro.xl.domain.Company;
 import com.inspiracode.nowgroup.scspro.xl.domain.Currency;
 import com.inspiracode.nowgroup.scspro.xl.domain.Incoterms;
 import com.inspiracode.nowgroup.scspro.xl.domain.LogMessage;
+import com.inspiracode.nowgroup.scspro.xl.domain.Material;
 import com.inspiracode.nowgroup.scspro.xl.domain.MaterialClass;
 import com.inspiracode.nowgroup.scspro.xl.domain.MaterialType;
 import com.inspiracode.nowgroup.scspro.xl.domain.PackageType;
@@ -66,7 +67,7 @@ public class ExcelFile {
     private static final Logger log = LoggerFactory.getLogger(ExcelFile.class);
 
     private static final int HEADING_ROW = 0;
-    private static final int HEADING_COUNT = 43;
+    private static final int HEADING_COUNT = 42;
     private File file;
     private List<PurchaseOrder> pos;
 
@@ -273,77 +274,83 @@ public class ExcelFile {
 
 	Incoterms incoterm = new Incoterms();
 	String incotermContent = getCellAsString(row.getCell(13));
-	if(incotermContent.length()==3)
+	if (incotermContent.length() == 3)
 	    incoterm.setIncotermsCode(incotermContent);
 	else
 	    incoterm.setIncotermsName(incotermContent);
-	
+
 	po.setIncoterm(incoterm);
-	
+
 	Currency currency = new Currency();
 	String currencyContent = getCellAsString(row.getCell(14)).trim();
-	if( currencyContent.length() == 3 )
+	if (currencyContent.length() == 3)
 	    currency.setCurrencyCode(currencyContent);
 	else
 	    currency.setCurrencyName(currencyContent);
-	
+
 	po.setCurrency(currency);
 	po.setSource(row.getCell(15).getStringCellValue());
-	
+
 	PurchaseOrderType poType = new PurchaseOrderType();
 	poType.setPoTypeName(getCellAsString(row.getCell(16)));
 	po.setOcType(poType);
-	
+
 	MaterialType materialType = new MaterialType();
 	materialType.setMaterialTypeName(getCellAsString(row.getCell(17)));
 	po.setMaterialType(materialType);
-	
-	
+
 	MaterialClass materialClass = new MaterialClass();
 	materialClass.setMaterialClassName(getCellAsString(row.getCell(18)));
 	po.setMaterialClass(materialClass);
 
 	TrafficType tt = new TrafficType();
 	String trafficTypeContent = getCellAsString(row.getCell(19));
-	
-	if(trafficTypeContent.length()<=2 && StringUtils.isNumeric(trafficTypeContent))
+
+	if (trafficTypeContent.length() <= 2 && StringUtils.isNumeric(trafficTypeContent) && trafficTypeContent.length() > 0)
 	    tt.setTrafficTypeCode(Integer.parseInt(trafficTypeContent));
 	else
 	    tt.setTrafficTypeName(trafficTypeContent);
-	
+
 	po.setTrafficType(tt);
-	
+
 	Company freightForwarder = new Company();
 	freightForwarder.setCompanyName(getCellAsString(row.getCell(20)));
-	
+
 	TransportMode poTm = new TransportMode();
 	poTm.setTransportModeName(getCellAsString(row.getCell(21)));
 	po.setTransportMode(poTm);
-	
+
 	po.setPackageQty((int) Math.ceil(row.getCell(22).getNumericCellValue()));
-	
+
 	PackageType packageType = new PackageType();
 	String packageTypeContent = getCellAsString(row.getCell(23));
-	if( packageTypeContent.length() <= 4 && !packageTypeContent.equalsIgnoreCase("DRUM"))
+	if (packageTypeContent.length() <= 4 && !packageTypeContent.equalsIgnoreCase("DRUM"))
 	    packageType.setPackageTypeCode(packageTypeContent);
 	else
 	    packageType.setPackageTypeName(packageTypeContent);
-	
-	po.setPackageType( packageType );
+
+	po.setPackageType(packageType);
 
 	PurchaseOrderItem item = new PurchaseOrderItem();
 	item.setSeqItem((int) Math.ceil(row.getCell(0).getNumericCellValue()));
-	
+
 	item.setMaterialType(materialType);
 	item.setMaterialClass(materialClass);
 
 	item.setStorage1(getCellAsString(row.getCell(24)));
 	item.setStorage2(getCellAsString(row.getCell(25)));
 	item.setItemNumber(getCellAsString(row.getCell(26)));
-	item.setPartNumber1(getCellAsString(row.getCell(27)));
-	item.setPartNumber2(getCellAsString(row.getCell(28)));
-	item.setSpanishDescription(row.getCell(29).getStringCellValue());
-	item.setEnglishDescription(row.getCell(30).getStringCellValue());
+	
+	Material material = new Material();
+	material.setPartNumber1(getCellAsString(row.getCell(27)));
+	material.setPartNumber2(getCellAsString(row.getCell(28)));
+	material.setDescripcionEsp(getCellAsString(row.getCell(29)));
+	material.setDescriptionIng(getCellAsString(row.getCell(30)));
+	material.setPurchaser(purchaser);
+	material.setSeller(seller);
+	
+	item.setMaterial(material);
+	
 	item.setMeasureUnit(getCellAsString(row.getCell(31)));
 	item.setOrderQuantity(row.getCell(32).getNumericCellValue());
 	item.setPendingQuantity(row.getCell(33).getNumericCellValue());
